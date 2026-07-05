@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ArticleStatus {
+  imported
+  processed
+}
+
+enum QuestionStatus {
+  draft
+  approved
+  rejected
+  published
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+model Article {
+  id           String        @id @default(cuid())
+  externalId   String        @unique
+  title        String
+  url          String        @unique
+  category     String
+  section      String?
+  rawHtml      String        @db.Text
+  markdown     String        @db.Text
+  links        Json
+  lastModified DateTime?
+  importedAt   DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  status       ArticleStatus @default(imported)
+  facts        Fact[]
+}
+
+model Fact {
+  id         String     @id @default(cuid())
+  articleId  String
+  article    Article    @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  text       String     @db.Text
+  importance Int
+  createdAt  DateTime   @default(now())
+  questions  Question[]
+}
+
+model Question {
+  id            String         @id @default(cuid())
+  factId        String
+  fact          Fact           @relation(fields: [factId], references: [id], onDelete: Cascade)
+  question      String         @db.Text
+  options       Json
+  correctAnswer Int
+  explanation   String         @db.Text
+  difficulty    Difficulty
+  status        QuestionStatus @default(draft)
+  publishedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model QuizResult {
+  id             String   @id @default(cuid())
+  score          Int
+  totalQuestions Int
+  category       String?
+  completedAt    DateTime @default(now())
+}
