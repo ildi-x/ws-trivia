@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { CategoryCard } from "@/components/quiz/category-card";
-import { QuizStatsLine } from "@/components/quiz/quiz-stats";
-import { getQuizCategories, getQuizStats } from "@/app/(public)/actions";
+import { getQuizCategories } from "@/app/(public)/actions";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [categories, stats] = await Promise.all([getQuizCategories(), getQuizStats()]);
+  const categories = await getQuizCategories();
 
   return (
     <>
@@ -36,10 +35,8 @@ export default async function HomePage() {
             </span>
           </h1>
           <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed text-pretty sm:text-lg">
-            Test what you know about investing, taxes, spending, transfers, promotions and more. Every answer links to official Wealthsimple documentation.
+            Test your knowledge across products, services, and policies. Each answer includes a direct link to the relevant Help Center article.
           </p>
-
-          <QuizStatsLine stats={stats} />
         </section>
 
         <section className="mt-14 sm:mt-20">

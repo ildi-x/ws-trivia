@@ -19,20 +19,6 @@ export async function getQuizCategories() {
   return sortHelpCenterCategories(articles.map((a) => a.category));
 }
 
-export type QuizStats = {
-  questions: number;
-  articlesProcessed: number;
-};
-
-export async function getQuizStats(): Promise<QuizStats> {
-  const [questions, articlesProcessed] = await Promise.all([
-    db.question.count({ where: { status: "published" } }),
-    db.article.count({ where: { status: "processed" } }),
-  ]);
-
-  return { questions, articlesProcessed };
-}
-
 export async function getQuizQuestions(category?: string) {
   const questions = await db.question.findMany({
     where: {
