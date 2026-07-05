@@ -49,6 +49,7 @@ export default async function AdminArticleDetailPage({
         </div>
         <ArticleActions
           articleId={article.id}
+          status={article.status}
           factCount={article.facts.length}
           questionCount={questionCount}
         />

@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginAction } from "./actions";
 
 export default async function AdminLoginPage({
   searchParams,
@@ -19,7 +18,7 @@ export default async function AdminLoginPage({
           <CardTitle>Admin Login</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={loginAction} className="space-y-4">
+          <form action="/api/admin/login" method="post" className="space-y-4">
             <input type="hidden" name="from" value={params.from ?? "/admin"} />
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>

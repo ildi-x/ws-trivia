@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 import type { Difficulty } from "@/generated/prisma/client";
 
 function revalidateQuestionPaths() {
@@ -13,6 +14,7 @@ function revalidateQuestionPaths() {
 }
 
 export async function approveQuestionAction(questionId: string) {
+  await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: { status: "published", publishedAt: new Date() },
@@ -21,6 +23,7 @@ export async function approveQuestionAction(questionId: string) {
 }
 
 export async function rejectQuestionAction(questionId: string) {
+  await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: { status: "rejected" },
@@ -29,6 +32,7 @@ export async function rejectQuestionAction(questionId: string) {
 }
 
 export async function unpublishQuestionAction(questionId: string) {
+  await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: { status: "draft", publishedAt: null },
@@ -37,11 +41,13 @@ export async function unpublishQuestionAction(questionId: string) {
 }
 
 export async function deleteQuestionAction(questionId: string) {
+  await requireAdmin();
   await db.question.delete({ where: { id: questionId } });
   revalidateQuestionPaths();
 }
 
 export async function publishQuestionAction(questionId: string) {
+  await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: { status: "published", publishedAt: new Date() },
@@ -59,6 +65,7 @@ export async function updateQuestionAction(
     difficulty: Difficulty;
   },
 ) {
+  await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: {

@@ -7,22 +7,38 @@ import {
   reprocessArticleAction,
   generateFactsAction,
   generateQuestionsAction,
+  unprocessArticleAction,
 } from "@/app/admin/(dashboard)/articles/[id]/actions";
 
 type ArticleActionsProps = {
   articleId: string;
+  status: "imported" | "processed";
   factCount: number;
   questionCount: number;
 };
 
 export function ArticleActions({
   articleId,
+  status,
   factCount,
   questionCount,
 }: ArticleActionsProps) {
   const [pending, startTransition] = useTransition();
   const hasFacts = factCount > 0;
   const hasQuestions = questionCount > 0;
+  const canUnprocess = status === "processed" || hasFacts;
+
+  function handleUnprocess() {
+    if (
+      !window.confirm(
+        "Unprocess this article? All facts and questions will be permanently deleted and the article will be marked as imported.",
+      )
+    ) {
+      return;
+    }
+
+    startTransition(() => unprocessArticleAction(articleId));
+  }
 
   return (
     <div className="flex flex-col items-stretch gap-2 sm:items-end">
@@ -70,6 +86,11 @@ export function ArticleActions({
             ? `Regenerate Questions (${questionCount})`
             : "Generate Questions"}
         </Button>
+        {canUnprocess && (
+          <Button variant="destructive" disabled={pending} onClick={handleUnprocess}>
+            Unprocess
+          </Button>
+        )}
       </div>
     </div>
   );
