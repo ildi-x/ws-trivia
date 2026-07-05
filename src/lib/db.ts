@@ -28,7 +28,7 @@ function createPrismaClient(): PrismaClient {
     max: 3,
     connectionTimeoutMillis: 5_000,
     idleTimeoutMillis: 300_000,
-    ...(connectionString.includes("supabase.co")
+    ...(connectionString.includes("supabase")
       ? { ssl: { rejectUnauthorized: false } }
       : {}),
   });
