@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { CategoryStatsTable } from "@/components/admin/category-stats-table";
 import { db } from "@/lib/db";
+import { getCategoryStats } from "@/lib/admin/category-stats";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +27,7 @@ export default async function AdminDashboardPage() {
     publishedCount,
     totalQuestions,
     latestArticle,
+    categoryStats,
   ] = await Promise.all([
     db.article.count(),
     db.article.count({ where: { status: "processed" } }),
@@ -43,6 +46,7 @@ export default async function AdminDashboardPage() {
       orderBy: { importedAt: "desc" },
       select: { importedAt: true },
     }),
+    getCategoryStats(),
   ]);
 
   const articlesPending = articlesScraped - articlesProcessed;
@@ -136,6 +140,16 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
         )}
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">
+          By category
+        </h2>
+        <p className="text-muted-foreground text-sm">
+          Articles published = articles with at least one published question in the quiz.
+        </p>
+        <CategoryStatsTable rows={categoryStats} />
       </section>
 
       <section className="space-y-3">
