@@ -35,7 +35,7 @@ export default async function HomePage() {
             </span>
           </h1>
           <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed text-pretty sm:text-lg">
-            Test your knowledge across products, services, and policies. Each answer includes a direct link to the relevant Help Center article.
+            Test your knowledge across products, services, and policies. Each answer includes a direct link to the relevant help center article.
           </p>
         </section>
 
