@@ -11,6 +11,14 @@ export function isValidAdminSession(token: string | undefined): boolean {
   return token === getAdminPassword();
 }
 
+/** Only allow same-origin relative paths (avoids open redirects). */
+export function safeAdminRedirectPath(from: string, fallback = "/admin"): string {
+  if (from.startsWith("/") && !from.startsWith("//") && from !== "/admin/login") {
+    return from;
+  }
+  return fallback;
+}
+
 export async function isAdminAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const token = cookieStore.get(ADMIN_COOKIE)?.value;

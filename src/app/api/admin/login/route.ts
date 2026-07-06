@@ -1,20 +1,17 @@
 import { NextResponse } from "next/server";
-import { ADMIN_COOKIE, getAdminPassword } from "@/lib/auth";
+import { ADMIN_COOKIE, getAdminPassword, safeAdminRedirectPath } from "@/lib/auth";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
   const password = String(formData.get("password") ?? "");
-  const from = String(formData.get("from") ?? "/admin");
+  const from = safeAdminRedirectPath(String(formData.get("from") ?? "/admin"));
 
   if (password !== getAdminPassword()) {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("error", "1");
-    loginUrl.searchParams.set("from", from);
+    const loginUrl = `/admin/login?error=1&from=${encodeURIComponent(from)}`;
     return NextResponse.redirect(loginUrl);
   }
 
-  const destination = from && from !== "/admin/login" ? from : "/admin";
-  const response = NextResponse.redirect(new URL(destination, request.url));
+  const response = NextResponse.redirect(from);
   response.cookies.set(ADMIN_COOKIE, getAdminPassword(), {
     httpOnly: true,
     sameSite: "lax",
