@@ -3,6 +3,9 @@
 import { db } from "@/lib/db";
 import { sortHelpCenterCategories } from "@/components/quiz/category-utils";
 
+const CATEGORY_QUIZ_SIZE = 10;
+const ALL_CATEGORIES_QUIZ_SIZE = 20;
+
 export async function getQuizCategories() {
   const articles = await db.article.findMany({
     where: {
@@ -31,7 +34,8 @@ export async function getQuizQuestions(category?: string) {
   });
 
   const shuffled = questions.sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, 10).map((q) => ({
+  const limit = category ? CATEGORY_QUIZ_SIZE : ALL_CATEGORIES_QUIZ_SIZE;
+  return shuffled.slice(0, limit).map((q) => ({
     id: q.id,
     question: q.question,
     options: q.options as string[],
