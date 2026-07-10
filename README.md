@@ -1,4 +1,4 @@
-# Wealthsimple Trivia
+# WS Trivia
 
 Interactive trivia built from real Wealthsimple Help Center content.
 
