@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { CategoryCard } from "@/components/quiz/category-card";
-import { getQuizCategories } from "@/app/(public)/actions";
+import { getQuizCategories, getQuizStats } from "@/app/(public)/actions";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const categories = await getQuizCategories();
+  const [categories, stats] = await Promise.all([getQuizCategories(), getQuizStats()]);
 
   return (
     <>
@@ -37,6 +37,13 @@ export default async function HomePage() {
           <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-base leading-relaxed text-pretty sm:text-lg">
             Test your knowledge across products, services, and policies. Each answer includes a direct link to the relevant help center article.
           </p>
+          {stats.publishedQuestions > 0 && (
+            <p className="text-muted-foreground/80 mt-4 text-sm tracking-tight">
+              {stats.publishedQuestions.toLocaleString("en-CA")} questions published from{" "}
+              {stats.publishedArticles.toLocaleString("en-CA")} help center{" "}
+              {stats.publishedArticles === 1 ? "article" : "articles"}
+            </p>
+          )}
         </section>
 
         <section className="mt-14 sm:mt-20">
