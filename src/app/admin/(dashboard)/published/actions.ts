@@ -6,11 +6,14 @@ import {
 } from "@/lib/admin/published-question-queries";
 import { requireAdmin } from "@/lib/auth";
 
-export async function fetchMorePublishedQuestions(cursor: string): Promise<{
+export async function fetchMorePublishedQuestions(
+  cursor: string,
+  filters: { category?: string; search?: string } = {},
+): Promise<{
   questions: PublishedQuestionRow[];
   hasMore: boolean;
   nextCursor: string | null;
 }> {
   await requireAdmin();
-  return getPublishedQuestionsPage(cursor);
+  return getPublishedQuestionsPage(cursor, filters);
 }

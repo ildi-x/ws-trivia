@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { fetchMorePublishedQuestions } from "@/app/admin/(dashboard)/published/actions";
-import type { PublishedQuestionRow } from "@/lib/admin/published-question-queries";
-import { PublishedQuestionItem } from "@/components/admin/published-question-item";
+import { fetchMoreDraftQuestions } from "@/app/admin/(dashboard)/questions/actions";
+import type { DraftQuestionRow } from "@/lib/admin/draft-question-queries";
+import { QuestionReviewCard } from "@/components/admin/question-review-card";
 
-type PublishedInfiniteListProps = {
-  initialQuestions: PublishedQuestionRow[];
+type QuestionsInfiniteListProps = {
+  initialQuestions: DraftQuestionRow[];
   initialHasMore: boolean;
   initialNextCursor: string | null;
   totalCount: number;
@@ -14,14 +14,14 @@ type PublishedInfiniteListProps = {
   search?: string;
 };
 
-export function PublishedInfiniteList({
+export function QuestionsInfiniteList({
   initialQuestions,
   initialHasMore,
   initialNextCursor,
   totalCount,
   category,
   search,
-}: PublishedInfiniteListProps) {
+}: QuestionsInfiniteListProps) {
   const [questions, setQuestions] = useState(initialQuestions);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
@@ -38,7 +38,7 @@ export function PublishedInfiniteList({
     setQuestions((prev) => prev.filter((question) => question.id !== id));
   }, []);
 
-  const updateQuestion = useCallback((updated: PublishedQuestionRow) => {
+  const updateQuestion = useCallback((updated: DraftQuestionRow) => {
     setQuestions((prev) =>
       prev.map((question) => (question.id === updated.id ? updated : question)),
     );
@@ -48,7 +48,7 @@ export function PublishedInfiniteList({
     if (!hasMore || isPending || !nextCursor) return;
 
     startTransition(async () => {
-      const result = await fetchMorePublishedQuestions(nextCursor, { category, search });
+      const result = await fetchMoreDraftQuestions({ category, search }, nextCursor);
       setQuestions((prev) => [...prev, ...result.questions]);
       setHasMore(result.hasMore);
       setNextCursor(result.nextCursor);
@@ -72,30 +72,34 @@ export function PublishedInfiniteList({
     return () => observer.disconnect();
   }, [loadMore]);
 
+  if (questions.length === 0) {
+    return (
+      <p className="text-muted-foreground text-sm">
+        {category || search
+          ? "No draft questions match your filters."
+          : "No draft questions. Generate questions from articles with facts."}
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {questions.map((question) => (
-        <PublishedQuestionItem
-          key={question.id}
-          question={question}
-          disabled={isPending}
-          onRemove={removeQuestion}
-          onUpdate={updateQuestion}
-        />
-      ))}
+      <QuestionReviewCard
+        questions={questions}
+        onRemove={removeQuestion}
+        onUpdate={updateQuestion}
+      />
 
-      {questions.length > 0 && (
-        <div className="flex flex-col items-center gap-2 py-2">
-          <p className="text-muted-foreground text-sm">
-            Showing {questions.length.toLocaleString()} of {totalCount.toLocaleString()}
-          </p>
-          {hasMore && (
-            <div ref={sentinelRef} className="text-muted-foreground text-xs">
-              {isPending ? "Loading more…" : "Scroll for more"}
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex flex-col items-center gap-2 py-2">
+        <p className="text-muted-foreground text-sm">
+          Showing {questions.length.toLocaleString()} of {totalCount.toLocaleString()}
+        </p>
+        {hasMore && (
+          <div ref={sentinelRef} className="text-muted-foreground text-xs">
+            {isPending ? "Loading more…" : "Scroll for more"}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

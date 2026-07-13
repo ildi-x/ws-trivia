@@ -2,12 +2,13 @@
 
 import {
   getArticlesPage,
+  type ArticleFilters,
   type ArticleListItem,
 } from "@/lib/admin/article-queries";
 import { requireAdmin } from "@/lib/auth";
 
 export async function fetchMoreArticles(
-  category: string | undefined,
+  filters: ArticleFilters,
   cursor: string,
 ): Promise<{
   articles: ArticleListItem[];
@@ -15,5 +16,5 @@ export async function fetchMoreArticles(
   nextCursor: string | null;
 }> {
   await requireAdmin();
-  return getArticlesPage(category, cursor);
+  return getArticlesPage(filters, cursor);
 }

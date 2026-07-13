@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SiteLogo } from "@/components/quiz/site-logo";
 import { cn } from "@/lib/utils";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
 
@@ -22,9 +23,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/"
-          className="truncate text-sm font-semibold tracking-tight sm:text-base"
+          aria-label="WS Trivia home"
+          className="inline-flex shrink-0 items-center transition-opacity hover:opacity-80 active:opacity-70"
         >
-          WS Trivia
+          <SiteLogo />
         </Link>
 
         <nav

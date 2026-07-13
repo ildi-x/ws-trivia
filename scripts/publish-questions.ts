@@ -4,10 +4,10 @@ import { logProgress, parseArgs } from "@/lib/pipeline/runner";
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const approvedOnly = !args.all;
+  const draftsOnly = !args.all;
 
   const result = await db.question.updateMany({
-    where: approvedOnly ? { status: "approved" } : { status: { in: ["approved", "draft"] } },
+    where: draftsOnly ? { status: "draft" } : { status: { in: ["draft", "approved"] } },
     data: { status: "published", publishedAt: new Date() },
   });
 

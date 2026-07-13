@@ -22,10 +22,7 @@ export default async function AdminDashboardPage() {
     factsWithQuestions,
     factsWithPublishedQuestions,
     draftCount,
-    approvedCount,
-    rejectedCount,
     publishedCount,
-    totalQuestions,
     latestArticle,
     categoryStats,
   ] = await Promise.all([
@@ -38,10 +35,7 @@ export default async function AdminDashboardPage() {
     db.fact.count({ where: { questions: { some: {} } } }),
     db.fact.count({ where: { questions: { some: { status: "published" } } } }),
     db.question.count({ where: { status: "draft" } }),
-    db.question.count({ where: { status: "approved" } }),
-    db.question.count({ where: { status: "rejected" } }),
     db.question.count({ where: { status: "published" } }),
-    db.question.count(),
     db.article.findFirst({
       orderBy: { importedAt: "desc" },
       select: { importedAt: true },
@@ -53,9 +47,9 @@ export default async function AdminDashboardPage() {
   const processedPct =
     articlesScraped > 0 ? Math.round((articlesProcessed / articlesScraped) * 100) : 0;
 
-  const pipelineStats: StatCard[] = [
+  const summaryStats: StatCard[] = [
     {
-      label: "Articles scraped",
+      label: "Total articles",
       value: articlesScraped.toLocaleString(),
       hint: `${articlesPending.toLocaleString()} awaiting fact extraction`,
       href: "/admin/articles",
@@ -72,37 +66,16 @@ export default async function AdminDashboardPage() {
       href: "/admin/facts",
     },
     {
+      label: "Pending questions",
+      value: draftCount.toLocaleString(),
+      hint: "Awaiting publish",
+      href: "/admin/questions",
+    },
+    {
       label: "Questions published",
       value: publishedCount.toLocaleString(),
-      hint: `from ${factsWithPublishedQuestions.toLocaleString()} facts · ${articlesWithPublishedQuestions.toLocaleString()} articles in quiz`,
+      hint: `From ${factsWithPublishedQuestions.toLocaleString()} facts generated across ${articlesWithPublishedQuestions.toLocaleString()} articles`,
       href: "/admin/published",
-    },
-  ];
-
-  const reviewStats: StatCard[] = [
-    {
-      label: "Draft",
-      value: draftCount.toLocaleString(),
-      hint: "Awaiting review",
-      href: "/admin/questions",
-    },
-    {
-      label: "Approved",
-      value: approvedCount.toLocaleString(),
-      hint: "Ready to publish",
-      href: "/admin/questions",
-    },
-    {
-      label: "Rejected",
-      value: rejectedCount.toLocaleString(),
-      hint: "Not used in quiz",
-      href: "/admin/questions",
-    },
-    {
-      label: "Total generated",
-      value: totalQuestions.toLocaleString(),
-      hint: `${publishedCount.toLocaleString()} published of ${totalQuestions.toLocaleString()}`,
-      href: "/admin/questions",
     },
   ];
 
@@ -111,16 +84,13 @@ export default async function AdminDashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground text-sm">
-          Pipeline overview for Wealthsimple Help Center trivia content.
+          Manage articles, facts, and quiz questions.
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">
-          Content pipeline
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {pipelineStats.map((stat) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          {summaryStats.map((stat) => (
             <StatCard key={stat.label} {...stat} />
           ))}
         </div>
@@ -150,17 +120,6 @@ export default async function AdminDashboardPage() {
           Articles published = articles with at least one published question in the quiz.
         </p>
         <CategoryStatsTable rows={categoryStats} />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-medium tracking-wide uppercase text-muted-foreground">
-          Question review
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {reviewStats.map((stat) => (
-            <StatCard key={stat.label} {...stat} />
-          ))}
-        </div>
       </section>
 
       {latestArticle && (

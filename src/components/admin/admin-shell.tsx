@@ -27,14 +27,15 @@ import {
 } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
+import { SiteLogo } from "@/components/quiz/site-logo";
 import { logoutAction } from "@/app/admin/login/actions";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/articles", label: "Articles", icon: FileText },
   { href: "/admin/facts", label: "Facts", icon: Lightbulb },
-  { href: "/admin/questions", label: "Questions", icon: HelpCircle },
-  { href: "/admin/published", label: "Published", icon: CheckCircle },
+  { href: "/admin/questions", label: "Pending Questions", icon: HelpCircle },
+  { href: "/admin/published", label: "Published Questions", icon: CheckCircle },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -44,10 +45,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader className="border-b px-4 py-4">
-          <Link href="/admin" className="font-semibold tracking-tight">
-            WS Trivia Admin
+          <Link
+            href="/admin"
+            aria-label="WS Trivia Admin"
+            className="inline-flex items-center gap-2.5 transition-opacity hover:opacity-80"
+          >
+            <SiteLogo />
+            <span className="text-muted-foreground text-[0.8125rem] font-semibold tracking-[-0.02em]">
+              Admin
+            </span>
           </Link>
-          <p className="text-muted-foreground text-xs">Content pipeline</p>
         </SidebarHeader>
         <SidebarContent>
           <SidebarGroup>
@@ -87,7 +94,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
           <Link href="/" className="text-muted-foreground ml-auto text-sm hover:underline">
-            View public quiz
+            Back to site
           </Link>
         </header>
         <main className="flex-1 p-6">{children}</main>

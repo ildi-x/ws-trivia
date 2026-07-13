@@ -2,9 +2,9 @@ import { db } from "@/lib/db";
 import { sortHelpCenterCategories } from "@/components/quiz/category-utils";
 import type { Prisma } from "@/generated/prisma/client";
 
-export const PUBLISHED_QUESTIONS_PAGE_SIZE = 50;
+export const DRAFT_QUESTIONS_PAGE_SIZE = 50;
 
-export type PublishedQuestionRow = {
+export type DraftQuestionRow = {
   id: string;
   question: string;
   options: string[];
@@ -14,31 +14,32 @@ export type PublishedQuestionRow = {
   category: string;
   articleId: string;
   articleTitle: string;
-  publishedAt: string | null;
+  articleUrl: string;
+  factText: string;
 };
 
-type PublishedQuestionFilters = {
+export type DraftQuestionFilters = {
   category?: string;
   search?: string;
 };
 
-async function getPublishedIdsMatchingOptions(search: string): Promise<string[]> {
+async function getDraftIdsMatchingOptions(search: string): Promise<string[]> {
   const rows = await db.$queryRaw<{ id: string }[]>`
     SELECT id FROM "Question"
-    WHERE status = 'published'
+    WHERE status = 'draft'
       AND "options"::text ILIKE ${`%${search}%`}
   `;
   return rows.map((row) => row.id);
 }
 
-async function buildPublishedWhere(
-  filters: PublishedQuestionFilters,
+async function buildDraftWhere(
+  filters: DraftQuestionFilters,
 ): Promise<Prisma.QuestionWhereInput> {
   const search = filters.search?.trim();
-  const optionMatchIds = search ? await getPublishedIdsMatchingOptions(search) : [];
+  const optionMatchIds = search ? await getDraftIdsMatchingOptions(search) : [];
 
   return {
-    status: "published",
+    status: "draft",
     ...(filters.category
       ? { fact: { article: { category: filters.category } } }
       : {}),
@@ -55,8 +56,8 @@ async function buildPublishedWhere(
 }
 
 function mapQuestion(
-  q: Awaited<ReturnType<typeof fetchPublishedBatch>>[number],
-): PublishedQuestionRow {
+  q: Awaited<ReturnType<typeof fetchDraftBatch>>[number],
+): DraftQuestionRow {
   return {
     id: q.id,
     question: q.question,
@@ -67,25 +68,30 @@ function mapQuestion(
     category: q.fact.article.category,
     articleId: q.fact.article.id,
     articleTitle: q.fact.article.title,
-    publishedAt: q.publishedAt?.toISOString() ?? null,
+    articleUrl: q.fact.article.url,
+    factText: q.fact.text,
   };
 }
 
-async function fetchPublishedBatch(cursor?: string, filters: PublishedQuestionFilters = {}) {
+async function fetchDraftBatch(cursor?: string, filters: DraftQuestionFilters = {}) {
   return db.question.findMany({
-    where: await buildPublishedWhere(filters),
+    where: await buildDraftWhere(filters),
     include: {
-      fact: { include: { article: { select: { id: true, title: true, category: true } } } },
+      fact: {
+        include: {
+          article: { select: { id: true, title: true, url: true, category: true } },
+        },
+      },
     },
-    orderBy: [{ publishedAt: "desc" }, { id: "desc" }],
-    take: PUBLISHED_QUESTIONS_PAGE_SIZE + 1,
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: DRAFT_QUESTIONS_PAGE_SIZE + 1,
     ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
   });
 }
 
-export async function getPublishedQuestionCategories() {
+export async function getDraftQuestionCategories() {
   const rows = await db.article.findMany({
-    where: { facts: { some: { questions: { some: { status: "published" } } } } },
+    where: { facts: { some: { questions: { some: { status: "draft" } } } } },
     distinct: ["category"],
     select: { category: true },
   });
@@ -93,13 +99,13 @@ export async function getPublishedQuestionCategories() {
   return sortHelpCenterCategories(rows.map((row) => row.category));
 }
 
-export async function getPublishedQuestionsPage(
+export async function getDraftQuestionsPage(
   cursor?: string,
-  filters: PublishedQuestionFilters = {},
+  filters: DraftQuestionFilters = {},
 ) {
-  const batch = await fetchPublishedBatch(cursor, filters);
-  const hasMore = batch.length > PUBLISHED_QUESTIONS_PAGE_SIZE;
-  const items = hasMore ? batch.slice(0, PUBLISHED_QUESTIONS_PAGE_SIZE) : batch;
+  const batch = await fetchDraftBatch(cursor, filters);
+  const hasMore = batch.length > DRAFT_QUESTIONS_PAGE_SIZE;
+  const items = hasMore ? batch.slice(0, DRAFT_QUESTIONS_PAGE_SIZE) : batch;
   const questions = items.map(mapQuestion);
 
   return {
@@ -109,6 +115,6 @@ export async function getPublishedQuestionsPage(
   };
 }
 
-export async function getPublishedQuestionsTotalCount(filters: PublishedQuestionFilters = {}) {
-  return db.question.count({ where: await buildPublishedWhere(filters) });
+export async function getDraftQuestionsTotalCount(filters: DraftQuestionFilters = {}) {
+  return db.question.count({ where: await buildDraftWhere(filters) });
 }

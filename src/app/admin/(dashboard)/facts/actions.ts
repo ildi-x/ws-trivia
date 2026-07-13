@@ -4,6 +4,23 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { extractFactsForArticle } from "@/lib/llm/extract-facts";
+import {
+  getFactsPage,
+  type FactFilters,
+  type FactListItem,
+} from "@/lib/admin/fact-queries";
+
+export async function fetchMoreFacts(
+  filters: FactFilters,
+  cursor: string,
+): Promise<{
+  facts: FactListItem[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}> {
+  await requireAdmin();
+  return getFactsPage(filters, cursor);
+}
 
 export async function updateFactAction(factId: string, text: string, importance: number) {
   await requireAdmin();

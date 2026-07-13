@@ -19,6 +19,7 @@ type ArticlesInfiniteListProps = {
   initialHasMore: boolean;
   initialNextCursor: string | null;
   category?: string;
+  search?: string;
   totalCount: number;
 };
 
@@ -27,6 +28,7 @@ export function ArticlesInfiniteList({
   initialHasMore,
   initialNextCursor,
   category,
+  search,
   totalCount,
 }: ArticlesInfiniteListProps) {
   const [articles, setArticles] = useState(initialArticles);
@@ -39,18 +41,18 @@ export function ArticlesInfiniteList({
     setArticles(initialArticles);
     setHasMore(initialHasMore);
     setNextCursor(initialNextCursor);
-  }, [initialArticles, initialHasMore, initialNextCursor, category]);
+  }, [initialArticles, initialHasMore, initialNextCursor, category, search]);
 
   const loadMore = useCallback(() => {
     if (!hasMore || isPending || !nextCursor) return;
 
     startTransition(async () => {
-      const result = await fetchMoreArticles(category, nextCursor);
+      const result = await fetchMoreArticles({ category, search }, nextCursor);
       setArticles((prev) => [...prev, ...result.articles]);
       setHasMore(result.hasMore);
       setNextCursor(result.nextCursor);
     });
-  }, [category, hasMore, isPending, nextCursor]);
+  }, [category, hasMore, isPending, nextCursor, search]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -85,7 +87,14 @@ export function ArticlesInfiniteList({
             {articles.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-muted-foreground py-8 text-center">
-                  No articles yet. Run <code className="text-xs">npm run scrape</code> to import.
+                  {category || search
+                    ? "No articles match your filters."
+                    : (
+                        <>
+                          No articles yet. Run <code className="text-xs">npm run scrape</code> to
+                          import.
+                        </>
+                      )}
                 </TableCell>
               </TableRow>
             ) : (

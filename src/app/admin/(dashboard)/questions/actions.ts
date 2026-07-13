@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import type { Difficulty } from "@/generated/prisma/client";
+import {
+  getDraftQuestionsPage,
+  type DraftQuestionFilters,
+  type DraftQuestionRow,
+} from "@/lib/admin/draft-question-queries";
 
 function revalidateQuestionPaths() {
   revalidatePath("/admin/questions");
@@ -13,20 +18,23 @@ function revalidateQuestionPaths() {
   revalidatePath("/");
 }
 
+export async function fetchMoreDraftQuestions(
+  filters: DraftQuestionFilters,
+  cursor: string,
+): Promise<{
+  questions: DraftQuestionRow[];
+  hasMore: boolean;
+  nextCursor: string | null;
+}> {
+  await requireAdmin();
+  return getDraftQuestionsPage(cursor, filters);
+}
+
 export async function approveQuestionAction(questionId: string) {
   await requireAdmin();
   await db.question.update({
     where: { id: questionId },
     data: { status: "published", publishedAt: new Date() },
-  });
-  revalidateQuestionPaths();
-}
-
-export async function rejectQuestionAction(questionId: string) {
-  await requireAdmin();
-  await db.question.update({
-    where: { id: questionId },
-    data: { status: "rejected" },
   });
   revalidateQuestionPaths();
 }
@@ -76,5 +84,5 @@ export async function updateQuestionAction(
       difficulty: data.difficulty,
     },
   });
-  revalidatePath("/admin/questions");
+  revalidateQuestionPaths();
 }

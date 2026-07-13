@@ -1,48 +1,55 @@
-import { db } from "@/lib/db";
-import { QuestionReviewCard } from "@/components/admin/question-review-card";
+import { QuestionsInfiniteList } from "@/components/admin/questions-infinite-list";
+import { QuestionsToolbar } from "@/components/admin/questions-toolbar";
+import {
+  getDraftQuestionCategories,
+  getDraftQuestionsPage,
+  getDraftQuestionsTotalCount,
+} from "@/lib/admin/draft-question-queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminQuestionsPage() {
-  const questions = await db.question.findMany({
-    where: { status: "draft" },
-    include: {
-      fact: {
-        include: { article: { select: { title: true, url: true } } },
-      },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+export default async function AdminQuestionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; q?: string }>;
+}) {
+  const params = await searchParams;
+  const category = params.category;
+  const search = params.q?.trim() || undefined;
+  const filters = { category, search };
 
-  const rows = questions.map((q) => ({
-    id: q.id,
-    question: q.question,
-    options: q.options as string[],
-    correctAnswer: q.correctAnswer,
-    explanation: q.explanation,
-    difficulty: q.difficulty,
-    articleTitle: q.fact.article.title,
-    articleUrl: q.fact.article.url,
-    factText: q.fact.text,
-  }));
+  const [{ questions, hasMore, nextCursor }, totalCount, categories] = await Promise.all([
+    getDraftQuestionsPage(undefined, filters),
+    getDraftQuestionsTotalCount(filters),
+    getDraftQuestionCategories(),
+  ]);
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Questions</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Pending Questions</h1>
         <p className="text-muted-foreground text-sm">
-          Review draft questions. Click Publish to make them live in the public quiz ({rows.length} in queue)
+          Publish, edit, or delete draft questions before they go live (
+          {totalCount.toLocaleString()}
+          {category || search ? " matching filters" : " in queue"})
         </p>
       </div>
 
-      {rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No draft questions. Generate questions from articles with facts.
-        </p>
-      ) : (
-        <QuestionReviewCard questions={rows} />
-      )}
+      <QuestionsToolbar
+        categories={categories}
+        activeCategory={category}
+        search={search ?? ""}
+      />
+
+      <QuestionsInfiniteList
+        key={`${category ?? "all"}-${search ?? ""}`}
+        initialQuestions={questions}
+        initialHasMore={hasMore}
+        initialNextCursor={nextCursor}
+        totalCount={totalCount}
+        category={category}
+        search={search}
+      />
     </div>
   );
 }

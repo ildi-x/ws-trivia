@@ -9,22 +9,21 @@ import {
   regenerateFactsAction,
   updateFactAction,
 } from "@/app/admin/(dashboard)/facts/actions";
+import type { FactListItem } from "@/lib/admin/fact-queries";
 
-type FactRow = {
-  id: string;
-  text: string;
-  importance: number;
-  articleId: string;
-  articleTitle: string;
+type FactEditorProps = {
+  facts: FactListItem[];
+  onRemove?: (id: string) => void;
+  onUpdate?: (id: string, text: string, importance: number) => void;
 };
 
-export function FactEditor({ facts }: { facts: FactRow[] }) {
+export function FactEditor({ facts, onRemove, onUpdate }: FactEditorProps) {
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [editImportance, setEditImportance] = useState(3);
 
-  function startEdit(fact: FactRow) {
+  function startEdit(fact: FactListItem) {
     setEditingId(fact.id);
     setEditText(fact.text);
     setEditImportance(fact.importance);
@@ -60,6 +59,7 @@ export function FactEditor({ facts }: { facts: FactRow[] }) {
                   onClick={() =>
                     startTransition(async () => {
                       await updateFactAction(fact.id, editText, editImportance);
+                      onUpdate?.(fact.id, editText, editImportance);
                       setEditingId(null);
                     })
                   }
@@ -75,7 +75,7 @@ export function FactEditor({ facts }: { facts: FactRow[] }) {
             <>
               <p className="text-sm">{fact.text}</p>
               <p className="text-muted-foreground mt-2 text-xs">
-                Importance {fact.importance} ·{" "}
+                {fact.category} · Importance {fact.importance} ·{" "}
                 <Link href={`/admin/articles/${fact.articleId}`} className="hover:underline">
                   {fact.articleTitle}
                 </Link>
@@ -98,7 +98,12 @@ export function FactEditor({ facts }: { facts: FactRow[] }) {
                   size="sm"
                   variant="destructive"
                   disabled={pending}
-                  onClick={() => startTransition(() => deleteFactAction(fact.id))}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await deleteFactAction(fact.id);
+                      onRemove?.(fact.id);
+                    })
+                  }
                 >
                   Delete
                 </Button>

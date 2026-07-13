@@ -1,39 +1,54 @@
-import { db } from "@/lib/db";
-import { FactEditor } from "@/components/admin/fact-editor";
+import { FactsInfiniteList } from "@/components/admin/facts-infinite-list";
+import { FactsToolbar } from "@/components/admin/facts-toolbar";
+import {
+  getFactCategories,
+  getFactsPage,
+  getFactsTotalCount,
+} from "@/lib/admin/fact-queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminFactsPage() {
-  const facts = await db.fact.findMany({
-    include: { article: { select: { id: true, title: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 100,
-  });
+export default async function AdminFactsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; q?: string }>;
+}) {
+  const params = await searchParams;
+  const category = params.category;
+  const search = params.q?.trim() || undefined;
+  const filters = { category, search };
 
-  const rows = facts.map((f) => ({
-    id: f.id,
-    text: f.text,
-    importance: f.importance,
-    articleId: f.article.id,
-    articleTitle: f.article.title,
-  }));
+  const [{ facts, hasMore, nextCursor }, totalCount, categories] = await Promise.all([
+    getFactsPage(filters),
+    getFactsTotalCount(filters),
+    getFactCategories(),
+  ]);
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Facts</h1>
         <p className="text-muted-foreground text-sm">
-          Atomic facts extracted from Help Center articles ({rows.length} shown)
+          Atomic facts extracted from Help Center articles ({totalCount.toLocaleString()}
+          {category || search ? " matching filters" : ""})
         </p>
       </div>
 
-      {rows.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          No facts yet. Generate facts from an article in the Articles section.
-        </p>
-      ) : (
-        <FactEditor facts={rows} />
-      )}
+      <FactsToolbar
+        categories={categories}
+        activeCategory={category}
+        search={search ?? ""}
+      />
+
+      <FactsInfiniteList
+        key={`${category ?? "all"}-${search ?? ""}`}
+        initialFacts={facts}
+        initialHasMore={hasMore}
+        initialNextCursor={nextCursor}
+        totalCount={totalCount}
+        category={category}
+        search={search}
+      />
     </div>
   );
 }

@@ -15,28 +15,26 @@ import {
 import {
   approveQuestionAction,
   deleteQuestionAction,
-  rejectQuestionAction,
   updateQuestionAction,
 } from "@/app/admin/(dashboard)/questions/actions";
+import type { DraftQuestionRow } from "@/lib/admin/draft-question-queries";
 
-type QuestionRow = {
-  id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-  difficulty: string;
-  articleTitle: string;
-  articleUrl: string;
-  factText: string;
+type QuestionReviewCardProps = {
+  questions: DraftQuestionRow[];
+  onRemove?: (id: string) => void;
+  onUpdate?: (question: DraftQuestionRow) => void;
 };
 
-export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) {
+export function QuestionReviewCard({
+  questions,
+  onRemove,
+  onUpdate,
+}: QuestionReviewCardProps) {
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<QuestionRow | null>(null);
+  const [form, setForm] = useState<DraftQuestionRow | null>(null);
 
-  function startEdit(q: QuestionRow) {
+  function startEdit(q: DraftQuestionRow) {
     setEditingId(q.id);
     setForm({ ...q });
   }
@@ -49,7 +47,10 @@ export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) 
     ) {
       return;
     }
-    startTransition(() => deleteQuestionAction(id));
+    startTransition(async () => {
+      await deleteQuestionAction(id);
+      onRemove?.(id);
+    });
   }
 
   return (
@@ -121,6 +122,7 @@ export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) 
                         explanation: form.explanation,
                         difficulty: form.difficulty as "easy" | "medium" | "hard",
                       });
+                      onUpdate?.(form);
                       setEditingId(null);
                     })
                   }
@@ -157,7 +159,7 @@ export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) 
               </ul>
               <p className="text-muted-foreground mt-4 text-sm">{q.explanation}</p>
               <p className="text-muted-foreground mt-2 text-xs">
-                Source:{" "}
+                {q.category} · Source:{" "}
                 <Link href={q.articleUrl} target="_blank" className="hover:underline">
                   {q.articleTitle}
                 </Link>
@@ -167,7 +169,12 @@ export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) 
                 <Button
                   size="sm"
                   disabled={pending}
-                  onClick={() => startTransition(() => approveQuestionAction(q.id))}
+                  onClick={() =>
+                    startTransition(async () => {
+                      await approveQuestionAction(q.id);
+                      onRemove?.(q.id);
+                    })
+                  }
                 >
                   Publish
                 </Button>
@@ -177,14 +184,6 @@ export function QuestionReviewCard({ questions }: { questions: QuestionRow[] }) 
                   onClick={() => startEdit(q)}
                 >
                   Edit
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={pending}
-                  onClick={() => startTransition(() => rejectQuestionAction(q.id))}
-                >
-                  Reject
                 </Button>
                 <Button
                   size="sm"

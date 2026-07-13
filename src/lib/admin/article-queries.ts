@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import type { ArticleStatus } from "@/generated/prisma/client";
+import type { Prisma } from "@/generated/prisma/client";
 
 export const ARTICLES_PAGE_SIZE = 50;
 
@@ -11,8 +12,22 @@ export type ArticleListItem = {
   lastModified: string | null;
 };
 
-export async function getArticlesPage(category?: string, cursor?: string) {
-  const where = category ? { category } : undefined;
+export type ArticleFilters = {
+  category?: string;
+  search?: string;
+};
+
+function buildArticlesWhere(filters: ArticleFilters = {}): Prisma.ArticleWhereInput {
+  const search = filters.search?.trim();
+
+  return {
+    ...(filters.category ? { category: filters.category } : {}),
+    ...(search ? { title: { contains: search, mode: "insensitive" } } : {}),
+  };
+}
+
+export async function getArticlesPage(filters: ArticleFilters = {}, cursor?: string) {
+  const where = buildArticlesWhere(filters);
 
   const batch = await db.article.findMany({
     where,
@@ -46,8 +61,6 @@ export async function getArticlesPage(category?: string, cursor?: string) {
   };
 }
 
-export async function getArticlesTotalCount(category?: string) {
-  return db.article.count({
-    where: category ? { category } : undefined,
-  });
+export async function getArticlesTotalCount(filters: ArticleFilters = {}) {
+  return db.article.count({ where: buildArticlesWhere(filters) });
 }
