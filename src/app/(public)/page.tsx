@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { CategoryCard } from "@/components/quiz/category-card";
 import { getQuizCategories, getQuizStats } from "@/app/(public)/actions";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
@@ -13,20 +12,17 @@ export default async function HomePage() {
     <>
       <main className="mx-auto max-w-6xl px-4 pb-24 pt-12 sm:px-6 sm:pt-20">
         <section className="mx-auto max-w-3xl text-center">
-          <p className="text-muted-foreground mb-5 inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-border/60 bg-card/50 px-3.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm">
-            <Sparkles className="size-3.5 shrink-0 text-violet-600 dark:text-violet-400" />
-            <span>
-              Built from real{" "}
-              <a
-                href={HELP_CENTER_HOME_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-foreground transition-opacity hover:opacity-80"
-              >
-                help center
-              </a>{" "}
-              articles
-            </span>
+          <p className="text-muted-foreground mx-auto mb-5 w-fit max-w-full whitespace-nowrap rounded-full border border-border/60 bg-card/50 px-3.5 py-1.5 text-xs font-medium shadow-sm backdrop-blur-sm">
+            Built from real{" "}
+            <a
+              href={HELP_CENTER_HOME_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-violet-600 transition-opacity hover:opacity-80 dark:text-violet-400"
+            >
+              help center
+            </a>{" "}
+            articles
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-5xl sm:leading-[1.08] lg:text-[3.25rem]">
             Learn Wealthsimple
