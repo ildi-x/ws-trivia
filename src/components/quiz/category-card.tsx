@@ -29,7 +29,6 @@ export function CategoryCard({
   return (
     <Link
       href={href}
-      scroll={false}
       className={cn(
         "group relative block h-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         featured && "sm:col-span-2",

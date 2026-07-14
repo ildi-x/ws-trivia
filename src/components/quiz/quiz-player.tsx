@@ -184,7 +184,6 @@ export function QuizPlayer({
             </div>
             <ButtonLink
               href="/"
-              scroll={false}
               variant="outline"
               className="h-11 w-full touch-manipulation sm:h-10"
             >

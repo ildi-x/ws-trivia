@@ -20,12 +20,11 @@ const EXTERNAL_LINKS = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
+    <header className="fixed top-0 right-0 left-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
         <Link
           href="/"
           aria-label="WS Trivia home"
-          scroll={false}
           className="inline-flex min-w-0 shrink-0 items-center transition-opacity hover:opacity-80 active:opacity-70"
         >
           <SiteLogo />

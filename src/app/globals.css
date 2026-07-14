@@ -126,6 +126,8 @@
   html {
     @apply font-sans;
     overflow-y: scroll;
+    /* Next.js scroll skips sticky/fixed headers; pad the scrollport by header height (h-14). */
+    scroll-padding-top: 3.5rem;
   }
   body {
     @apply bg-background text-foreground font-sans;
