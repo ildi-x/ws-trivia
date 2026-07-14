@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import {
@@ -7,7 +5,6 @@ import {
   getCategoryIcon,
   getCategoryStyle,
 } from "@/components/quiz/category-utils";
-import { scrollWindowToTop } from "@/lib/scroll-to-top";
 import { cn } from "@/lib/utils";
 
 type CategoryCardProps = {
@@ -32,10 +29,7 @@ export function CategoryCard({
   return (
     <Link
       href={href}
-      scroll
-      onClick={() => {
-        scrollWindowToTop();
-      }}
+      scroll={false}
       className={cn(
         "group relative block h-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         featured && "sm:col-span-2",

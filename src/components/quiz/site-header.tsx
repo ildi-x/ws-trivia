@@ -25,6 +25,7 @@ export function SiteHeader() {
         <Link
           href="/"
           aria-label="WS Trivia home"
+          scroll={false}
           className="inline-flex min-w-0 shrink-0 items-center transition-opacity hover:opacity-80 active:opacity-70"
         >
           <SiteLogo />

@@ -1,18 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { scrollWindowToTop } from "@/lib/scroll-to-top";
+import {
+  disableBrowserScrollRestoration,
+  scrollWindowToTop,
+} from "@/lib/scroll-to-top";
 
-/** Resets scroll on client navigations (home → quiz, etc.), especially on mobile Safari/Chrome. */
+/**
+ * On route / query changes, reset window scroll before paint.
+ * Intentionally one shot — no retries, no scrollIntoView (those clip under sticky header on iOS).
+ */
 export function ScrollToTop() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const search = searchParams.toString();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    disableBrowserScrollRestoration();
     scrollWindowToTop();
   }, [pathname, search]);
 
-  return <div id="page-top" aria-hidden className="pointer-events-none absolute top-0 left-0 h-0 w-0" />;
+  return null;
 }

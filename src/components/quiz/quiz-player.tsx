@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useLayoutEffect, useState, useTransition } from "react";
 import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { getQuizQuestions, saveQuizResult } from "@/app/(public)/actions";
@@ -47,8 +47,8 @@ export function QuizPlayer({
   const answered = selected !== null;
   const progress = ((index + (answered ? 1 : 0)) / quizQuestions.length) * 100;
 
-  // Keep the viewport at the top when entering a quiz, changing questions, or finishing.
-  useEffect(() => {
+  // Scroll before paint so the next question / results never flash mid-page.
+  useLayoutEffect(() => {
     scrollWindowToTop();
   }, [index, finished]);
 
@@ -61,7 +61,6 @@ export function QuizPlayer({
     setScore(0);
     setFinished(false);
     setSaved(false);
-    scrollWindowToTop();
   }
 
   function handleRetry() {
@@ -90,9 +89,6 @@ export function QuizPlayer({
   }
 
   async function handleNext() {
-    // Scroll immediately on tap — iOS often ignores scrollTo if delayed until after re-render.
-    scrollWindowToTop();
-
     if (index + 1 >= quizQuestions.length) {
       if (!saved) {
         const finalAnswers = answers.map((answer, i) =>
@@ -128,10 +124,7 @@ export function QuizPlayer({
           : "Good start. Each answer links to the source material.";
 
     return (
-      <main
-        id="quiz-scroll-top"
-        className="mx-auto w-full min-w-0 max-w-2xl px-4 py-6 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-12"
-      >
+      <main className="mx-auto w-full min-w-0 max-w-2xl px-4 py-6 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-12">
         <div className="rounded-2xl border bg-card p-5 text-center shadow-sm sm:p-8">
           <div className="relative mx-auto mb-5 flex size-28 items-center justify-center sm:mb-6 sm:size-32">
             <svg className="absolute inset-0 -rotate-90" viewBox="0 0 120 120">
@@ -191,6 +184,7 @@ export function QuizPlayer({
             </div>
             <ButtonLink
               href="/"
+              scroll={false}
               variant="outline"
               className="h-11 w-full touch-manipulation sm:h-10"
             >
@@ -298,10 +292,7 @@ export function QuizPlayer({
   }
 
   return (
-    <main
-      id="quiz-scroll-top"
-      className="mx-auto w-full min-w-0 max-w-2xl px-4 py-6 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-12"
-    >
+    <main className="mx-auto w-full min-w-0 max-w-2xl px-4 py-6 pb-[max(3rem,env(safe-area-inset-bottom))] sm:px-6 sm:py-12">
       <div className="mb-8 space-y-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
