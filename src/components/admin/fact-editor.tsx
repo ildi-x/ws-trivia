@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import {
   deleteFactAction,
@@ -22,11 +23,21 @@ export function FactEditor({ facts, onRemove, onUpdate }: FactEditorProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const [editImportance, setEditImportance] = useState(3);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   function startEdit(fact: FactListItem) {
     setEditingId(fact.id);
     setEditText(fact.text);
     setEditImportance(fact.importance);
+  }
+
+  function confirmDelete() {
+    if (!deleteId) return;
+    startTransition(async () => {
+      await deleteFactAction(deleteId);
+      onRemove?.(deleteId);
+      setDeleteId(null);
+    });
   }
 
   return (
@@ -98,12 +109,7 @@ export function FactEditor({ facts, onRemove, onUpdate }: FactEditorProps) {
                   size="sm"
                   variant="destructive"
                   disabled={pending}
-                  onClick={() =>
-                    startTransition(async () => {
-                      await deleteFactAction(fact.id);
-                      onRemove?.(fact.id);
-                    })
-                  }
+                  onClick={() => setDeleteId(fact.id)}
                 >
                   Delete
                 </Button>
@@ -112,6 +118,20 @@ export function FactEditor({ facts, onRemove, onUpdate }: FactEditorProps) {
           )}
         </div>
       ))}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => {
+          if (!open && pending) return;
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete this fact?"
+        description="Any questions generated from this fact will also be permanently deleted. This cannot be undone."
+        confirmLabel="Delete"
+        pending={pending}
+        destructive
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

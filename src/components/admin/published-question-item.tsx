@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -35,6 +36,7 @@ export function PublishedQuestionItem({
   const [pending, startTransition] = useTransition();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<PublishedQuestionRow | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   function startEdit() {
     setEditing(true);
@@ -48,18 +50,11 @@ export function PublishedQuestionItem({
     });
   }
 
-  function handleDelete() {
-    if (
-      !window.confirm(
-        "Delete this question permanently? It will be removed from the quiz and cannot be undone.",
-      )
-    ) {
-      return;
-    }
-
+  function confirmDelete() {
     startTransition(async () => {
       await deleteQuestionAction(question.id);
       onRemove(question.id);
+      setDeleteOpen(false);
     });
   }
 
@@ -206,12 +201,31 @@ export function PublishedQuestionItem({
             <Button size="sm" variant="outline" disabled={isDisabled} onClick={handleUnpublish}>
               Unpublish
             </Button>
-            <Button size="sm" variant="destructive" disabled={isDisabled} onClick={handleDelete}>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={isDisabled}
+              onClick={() => setDeleteOpen(true)}
+            >
               Delete
             </Button>
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (!open && pending) return;
+          setDeleteOpen(open);
+        }}
+        title="Delete this question?"
+        description="This permanently removes the question from the quiz. This cannot be undone."
+        confirmLabel="Delete"
+        pending={pending}
+        destructive
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

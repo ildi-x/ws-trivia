@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -33,23 +34,19 @@ export function QuestionReviewCard({
   const [pending, startTransition] = useTransition();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<DraftQuestionRow | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   function startEdit(q: DraftQuestionRow) {
     setEditingId(q.id);
     setForm({ ...q });
   }
 
-  function handleDelete(id: string) {
-    if (
-      !window.confirm(
-        "Delete this question permanently? It cannot be undone.",
-      )
-    ) {
-      return;
-    }
+  function confirmDelete() {
+    if (!deleteId) return;
     startTransition(async () => {
-      await deleteQuestionAction(id);
-      onRemove?.(id);
+      await deleteQuestionAction(deleteId);
+      onRemove?.(deleteId);
+      setDeleteId(null);
     });
   }
 
@@ -178,18 +175,14 @@ export function QuestionReviewCard({
                 >
                   Publish
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => startEdit(q)}
-                >
+                <Button size="sm" variant="outline" onClick={() => startEdit(q)}>
                   Edit
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
+                  variant="destructive"
                   disabled={pending}
-                  onClick={() => handleDelete(q.id)}
+                  onClick={() => setDeleteId(q.id)}
                 >
                   Delete
                 </Button>
@@ -198,6 +191,20 @@ export function QuestionReviewCard({
           )}
         </div>
       ))}
+
+      <ConfirmDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => {
+          if (!open && pending) return;
+          if (!open) setDeleteId(null);
+        }}
+        title="Delete this question?"
+        description="This permanently removes the question. This cannot be undone."
+        confirmLabel="Delete"
+        pending={pending}
+        destructive
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }
