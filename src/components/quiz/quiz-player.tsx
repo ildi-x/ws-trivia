@@ -14,6 +14,7 @@ type QuizQuestion = {
   explanation: string;
   articleTitle: string;
   articleUrl: string;
+  category: string;
 };
 
 const OPTION_LABELS = ["A", "B", "C", "D"];
@@ -147,9 +148,9 @@ export function QuizPlayer({
               style={{ width: `${progress}%` }}
             />
           </div>
-          {category && (
+          {(category || current.category) && (
             <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
-              {category}
+              {category ?? current.category}
             </p>
           )}
         </div>
