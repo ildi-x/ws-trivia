@@ -23,6 +23,12 @@ function shuffleQuestions(questions: QuizQuestion[]): QuizQuestion[] {
   return [...questions].sort(() => Math.random() - 0.5);
 }
 
+function scrollWindowToTop() {
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
+
 export function QuizPlayer({
   questions,
   category,
@@ -46,10 +52,10 @@ export function QuizPlayer({
   const answered = selected !== null;
   const progress = ((index + (answered ? 1 : 0)) / quizQuestions.length) * 100;
 
+  // Keep the viewport at the top when entering a quiz, changing questions, or finishing.
   useEffect(() => {
-    if (!finished) return;
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [finished]);
+    scrollWindowToTop();
+  }, [index, finished]);
 
   function resetWithQuestions(next: QuizQuestion[]) {
     setSessionQuestions(next);
@@ -60,7 +66,7 @@ export function QuizPlayer({
     setScore(0);
     setFinished(false);
     setSaved(false);
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    scrollWindowToTop();
   }
 
   function handleRetry() {
