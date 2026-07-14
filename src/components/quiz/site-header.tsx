@@ -20,7 +20,9 @@ const EXTERNAL_LINKS = [
 
 export function SiteHeader() {
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
+    // Sticky stays in document flow, so content naturally starts below it —
+    // no fragile padding-top offset that drifts on iPhone safe areas.
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 pt-[env(safe-area-inset-top)] backdrop-blur-xl">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
         <Link
           href="/"

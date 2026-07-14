@@ -11,11 +11,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
         <ScrollReset />
       </Suspense>
       <SiteHeader />
-      {/*
-        Fixed header is out of document flow. Offset content by header height (h-14)
-        so page content is never covered when scrollY is 0.
-      */}
-      <div className="flex flex-1 flex-col pt-14">
+      {/* Sticky header is in-flow — no pt offset needed */}
+      <div className="flex flex-1 flex-col">
         <div className="flex-1">{children}</div>
         <SiteFooter />
       </div>

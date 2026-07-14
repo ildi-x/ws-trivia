@@ -126,8 +126,8 @@
   html {
     @apply font-sans;
     overflow-y: scroll;
-    /* Next.js scroll skips sticky/fixed headers; pad the scrollport by header height (h-14). */
-    scroll-padding-top: 3.5rem;
+    /* Next.js scroll skips sticky headers; offset by header + iOS safe area. */
+    scroll-padding-top: calc(3.5rem + env(safe-area-inset-top, 0px));
   }
   body {
     @apply bg-background text-foreground font-sans;
