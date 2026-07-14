@@ -39,8 +39,8 @@ export function CategoryCard({
           "relative flex h-full min-h-[11.5rem] flex-col overflow-hidden rounded-2xl border p-6 transition-all duration-300 sm:p-7",
           featured
             ? cn(
-                "border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] via-card/80 to-card/60 shadow-sm backdrop-blur-sm",
-                "group-hover:-translate-y-0.5 group-hover:border-violet-500/30 group-hover:bg-card group-hover:shadow-lg group-hover:shadow-violet-500/5",
+                "border-violet-500/20 bg-gradient-to-br from-violet-500/[0.06] via-card/80 to-card/60 shadow-sm backdrop-blur-sm dark:border-violet-400/20 dark:from-violet-400/[0.1]",
+                "group-hover:-translate-y-0.5 group-hover:border-violet-500/30 group-hover:bg-card group-hover:shadow-lg group-hover:shadow-violet-500/5 dark:group-hover:border-violet-400/30 dark:group-hover:shadow-violet-400/5",
               )
             : cn(
                 "border-border/50 bg-card/60 shadow-sm backdrop-blur-sm",

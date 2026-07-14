@@ -28,6 +28,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { SiteLogo } from "@/components/quiz/site-logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logoutAction } from "@/app/admin/login/actions";
 
 const navItems = [
@@ -93,9 +94,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <header className="flex h-14 items-center gap-2 border-b px-4">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-4" />
-          <Link href="/" className="text-muted-foreground ml-auto text-sm hover:underline">
-            Back to site
-          </Link>
+          <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="text-muted-foreground px-2 text-sm transition-colors hover:text-foreground"
+            >
+              Back to site
+            </Link>
+          </div>
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
