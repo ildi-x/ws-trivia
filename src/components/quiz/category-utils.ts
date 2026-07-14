@@ -51,6 +51,40 @@ export function sortHelpCenterCategories(categories: string[]): string[] {
   return [...categories].sort(compareHelpCenterCategories);
 }
 
+/** URL-safe kebab slug, e.g. "Get Started" → "get-started" */
+export function categoryToSlug(category: string): string {
+  return category
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+/**
+ * Resolve a quiz `?category=` value (slug or legacy title) to a DB category name.
+ */
+export function resolveCategorySlug(
+  param: string,
+  categories: string[],
+): string | undefined {
+  let decoded = param.trim();
+  try {
+    decoded = decodeURIComponent(decoded.replace(/\+/g, " ")).trim();
+  } catch {
+    // keep raw trim
+  }
+  if (!decoded) return undefined;
+
+  const slug = categoryToSlug(decoded);
+  const bySlug = categories.find((category) => categoryToSlug(category) === slug);
+  if (bySlug) return bySlug;
+
+  return categories.find(
+    (category) => category.toLowerCase() === decoded.toLowerCase(),
+  );
+}
+
 const categoryIcons: Record<string, LucideIcon> = {
   "All categories": Layers,
   "Get Started": Sparkles,

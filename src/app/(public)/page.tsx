@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CategoryCard } from "@/components/quiz/category-card";
+import { categoryToSlug } from "@/components/quiz/category-utils";
 import { getQuizCategories, getQuizStats } from "@/app/(public)/actions";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
 
@@ -78,7 +79,7 @@ export default async function HomePage() {
                   <CategoryCard
                     key={category}
                     title={category}
-                    href={`/quiz/play?category=${encodeURIComponent(category)}`}
+                    href={`/quiz/play?category=${categoryToSlug(category)}`}
                     index={index + 1}
                   />
                 ))}
