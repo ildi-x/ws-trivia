@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState, useTransition } from "react";
+import { useLayoutEffect, useState, useTransition } from "react";
 import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { getQuizQuestions, saveQuizResult } from "@/app/(public)/actions";
-import { forceScrollWindowToTop, scrollWindowToTop } from "@/lib/scroll-to-top";
+import { scrollAppToTop } from "@/lib/scroll-to-top";
 import { cn } from "@/lib/utils";
 
 type QuizQuestion = {
@@ -47,14 +47,10 @@ export function QuizPlayer({
   const answered = selected !== null;
   const progress = ((index + (answered ? 1 : 0)) / quizQuestions.length) * 100;
 
-  // Next question / results: force the window to document top. iOS often ignores
-  // a single scrollTo after a large layout swap when the user was scrolled down.
+  // Advancing question / showing results is a state change (not navigation),
+  // so reset the scroll region here. Runs before paint = no flash.
   useLayoutEffect(() => {
-    scrollWindowToTop();
-  }, [index, finished]);
-
-  useEffect(() => {
-    forceScrollWindowToTop();
+    scrollAppToTop();
   }, [index, finished]);
 
   function resetWithQuestions(next: QuizQuestion[]) {
@@ -66,7 +62,6 @@ export function QuizPlayer({
     setScore(0);
     setFinished(false);
     setSaved(false);
-    forceScrollWindowToTop();
   }
 
   function handleRetry() {
@@ -95,10 +90,6 @@ export function QuizPlayer({
   }
 
   async function handleNext() {
-    // Scroll on tap — before React commits / before any await — so iOS doesn't
-    // keep the previous scroll offset under the sticky header.
-    forceScrollWindowToTop();
-
     if (index + 1 >= quizQuestions.length) {
       if (!saved) {
         const finalAnswers = answers.map((answer, i) =>
