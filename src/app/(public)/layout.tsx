@@ -1,9 +1,11 @@
 import { SiteFooter } from "@/components/quiz/site-footer";
 import { SiteHeader } from "@/components/quiz/site-header";
+import { ScrollReset } from "@/components/quiz/scroll-reset";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="public-page-bg relative isolate flex min-h-dvh flex-col">
+      <ScrollReset />
       <SiteHeader />
       {/*
         Fixed header is out of document flow. Offset content by header height (h-14)
