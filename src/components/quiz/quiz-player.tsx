@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useLayoutEffect, useState, useTransition } from "react";
 import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { getQuizQuestions, saveQuizResult } from "@/app/(public)/actions";
-import { scrollWindowToTopAfterPaint } from "@/lib/scroll-to-top";
+import { forceScrollWindowToTop, scrollWindowToTop } from "@/lib/scroll-to-top";
 import { cn } from "@/lib/utils";
 
 type QuizQuestion = {
@@ -47,9 +47,14 @@ export function QuizPlayer({
   const answered = selected !== null;
   const progress = ((index + (answered ? 1 : 0)) / quizQuestions.length) * 100;
 
-  // After paint so iOS Safari doesn't ignore scrollTo before layout settles.
+  // Next question / results: force the window to document top. iOS often ignores
+  // a single scrollTo after a large layout swap when the user was scrolled down.
+  useLayoutEffect(() => {
+    scrollWindowToTop();
+  }, [index, finished]);
+
   useEffect(() => {
-    scrollWindowToTopAfterPaint();
+    forceScrollWindowToTop();
   }, [index, finished]);
 
   function resetWithQuestions(next: QuizQuestion[]) {
@@ -61,6 +66,7 @@ export function QuizPlayer({
     setScore(0);
     setFinished(false);
     setSaved(false);
+    forceScrollWindowToTop();
   }
 
   function handleRetry() {
@@ -89,6 +95,10 @@ export function QuizPlayer({
   }
 
   async function handleNext() {
+    // Scroll on tap — before React commits / before any await — so iOS doesn't
+    // keep the previous scroll offset under the sticky header.
+    forceScrollWindowToTop();
+
     if (index + 1 >= quizQuestions.length) {
       if (!saved) {
         const finalAnswers = answers.map((answer, i) =>
@@ -184,6 +194,7 @@ export function QuizPlayer({
             </div>
             <ButtonLink
               href="/"
+              scroll={false}
               variant="outline"
               className="h-11 w-full touch-manipulation sm:h-10"
             >

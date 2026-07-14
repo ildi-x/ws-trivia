@@ -13,16 +13,23 @@ export function scrollWindowToTop() {
 }
 
 /**
- * Same as scrollWindowToTop, but waits until after the next paint.
- * Use for route changes / large layout swaps where Safari may ignore an
- * immediate scrollTo before layout has settled.
+ * Aggressive reset for iOS Safari, which often ignores a single scrollTo when
+ * layout is still settling after a route change or question swap.
+ * Call from a click handler AND from a layout/paint effect.
  */
-export function scrollWindowToTopAfterPaint() {
+export function forceScrollWindowToTop() {
   if (typeof window === "undefined") return;
 
+  scrollWindowToTop();
+
   requestAnimationFrame(() => {
+    scrollWindowToTop();
     requestAnimationFrame(() => {
       scrollWindowToTop();
     });
   });
+
+  window.setTimeout(scrollWindowToTop, 0);
+  window.setTimeout(scrollWindowToTop, 50);
+  window.setTimeout(scrollWindowToTop, 100);
 }

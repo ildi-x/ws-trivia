@@ -26,6 +26,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:gap-4 sm:px-6">
         <Link
           href="/"
+          scroll={false}
           aria-label="WS Trivia home"
           className="inline-flex min-w-0 shrink-0 items-center transition-opacity hover:opacity-80 active:opacity-70"
         >

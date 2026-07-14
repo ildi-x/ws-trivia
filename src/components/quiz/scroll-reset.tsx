@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { scrollWindowToTop } from "@/lib/scroll-to-top";
+import { forceScrollWindowToTop, scrollWindowToTop } from "@/lib/scroll-to-top";
 
 /**
- * Reset window scroll on every client-side route change.
+ * Force window scroll to 0 on every client navigation.
  *
- * Next.js App Router often preserves the previous page's scrollY when the
- * destination starts with a fixed/sticky header (it skips those nodes when
- * choosing a scroll target). Watching pathname + searchParams and scrolling
- * after paint is the standard, reliable fix — including on iOS Safari, which
- * can ignore a scrollTo that runs before the new page has finished laying out.
+ * Next.js skips sticky/fixed headers when picking a scroll target, then
+ * scrollIntoView()'s the page content to the top of the viewport — which
+ * puts "Question 1 of 10" under the sticky header. Disable that via
+ * `scroll={false}` on Links, and reset here so we always land at document top
+ * (where a sticky header is still in flow and content sits below it).
  */
 export function ScrollReset() {
   const pathname = usePathname();
@@ -24,13 +24,12 @@ export function ScrollReset() {
     }
   }, []);
 
+  useLayoutEffect(() => {
+    scrollWindowToTop();
+  }, [pathname, search]);
+
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        scrollWindowToTop();
-      });
-    });
-    return () => cancelAnimationFrame(frame);
+    forceScrollWindowToTop();
   }, [pathname, search]);
 
   return null;
