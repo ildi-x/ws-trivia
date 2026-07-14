@@ -28,5 +28,5 @@ export default async function QuizPlayPage({
     redirect("/");
   }
 
-  return <QuizPlayer questions={questions} category={category} />;
+  return <QuizPlayer key={category ?? "all"} questions={questions} category={category} />;
 }
