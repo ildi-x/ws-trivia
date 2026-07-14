@@ -1,10 +1,10 @@
 "use client";
 
-import { useLayoutEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { ArrowRight, ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { getQuizQuestions, saveQuizResult } from "@/app/(public)/actions";
-import { scrollWindowToTop } from "@/lib/scroll-to-top";
+import { scrollWindowToTopAfterPaint } from "@/lib/scroll-to-top";
 import { cn } from "@/lib/utils";
 
 type QuizQuestion = {
@@ -47,9 +47,9 @@ export function QuizPlayer({
   const answered = selected !== null;
   const progress = ((index + (answered ? 1 : 0)) / quizQuestions.length) * 100;
 
-  // Scroll before paint so the next question / results never flash mid-page.
-  useLayoutEffect(() => {
-    scrollWindowToTop();
+  // After paint so iOS Safari doesn't ignore scrollTo before layout settles.
+  useEffect(() => {
+    scrollWindowToTopAfterPaint();
   }, [index, finished]);
 
   function resetWithQuestions(next: QuizQuestion[]) {

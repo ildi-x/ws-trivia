@@ -1,36 +1,37 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { scrollWindowToTop } from "@/lib/scroll-to-top";
 
 /**
- * Forces scroll-to-top on client-side forward navigations.
+ * Reset window scroll on every client-side route change.
  *
- * Two things conspire to leave the page scrolled mid-content after a `Link`
- * click:
- *   1. Next.js intentionally skips sticky/fixed elements when picking a scroll
- *      target, so with a fixed header it can bail out of scrolling entirely.
- *   2. iOS Safari has a dual (large/small) viewport toolbar state; navigating
- *      while the toolbar is "large" leaves a residual scroll offset.
- *
- * Patching `history.pushState` resets scroll on every *forward* navigation.
- * Back/forward use `popstate` (not `pushState`), so native scroll restoration
- * is preserved.
+ * Next.js App Router often preserves the previous page's scrollY when the
+ * destination starts with a fixed/sticky header (it skips those nodes when
+ * choosing a scroll target). Watching pathname + searchParams and scrolling
+ * after paint is the standard, reliable fix — including on iOS Safari, which
+ * can ignore a scrollTo that runs before the new page has finished laying out.
  */
 export function ScrollReset() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const search = searchParams.toString();
+
   useEffect(() => {
-    const original = history.pushState.bind(history);
-
-    history.pushState = function patchedPushState(
-      ...args: Parameters<typeof history.pushState>
-    ) {
-      original(...args);
-      window.scrollTo(0, 0);
-    };
-
-    return () => {
-      history.pushState = original;
-    };
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
   }, []);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        scrollWindowToTop();
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pathname, search]);
 
   return null;
 }

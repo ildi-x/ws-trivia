@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { SiteFooter } from "@/components/quiz/site-footer";
 import { SiteHeader } from "@/components/quiz/site-header";
 import { ScrollReset } from "@/components/quiz/scroll-reset";
@@ -5,12 +6,14 @@ import { ScrollReset } from "@/components/quiz/scroll-reset";
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="public-page-bg relative isolate flex min-h-dvh flex-col">
-      <ScrollReset />
+      {/* useSearchParams requires a Suspense boundary */}
+      <Suspense fallback={null}>
+        <ScrollReset />
+      </Suspense>
       <SiteHeader />
       {/*
         Fixed header is out of document flow. Offset content by header height (h-14)
-        so "Question 1 of 10" is never covered — including when Next.js scrolls past
-        sticky/fixed chrome (it skips those nodes by design).
+        so page content is never covered when scrollY is 0.
       */}
       <div className="flex flex-1 flex-col pt-14">
         <div className="flex-1">{children}</div>
