@@ -13,6 +13,8 @@ Rules:
 
 type ExtractionResponse = { facts: ExtractedFact[] };
 
+const MARKDOWN_CHAR_LIMIT = 110_000;
+
 export async function extractFactsForArticle(articleId: string, force = false) {
   const article = await db.article.findUniqueOrThrow({ where: { id: articleId } });
 
@@ -25,7 +27,7 @@ export async function extractFactsForArticle(articleId: string, force = false) {
 
   const result = await chatJson<ExtractionResponse>(
     SYSTEM_PROMPT,
-    `Title: ${article.title}\n\nArticle content:\n${article.markdown.slice(0, 12000)}`,
+    `Title: ${article.title}\n\nArticle content:\n${article.markdown.slice(0, MARKDOWN_CHAR_LIMIT)}`,
   );
 
   let created = 0;
