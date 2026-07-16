@@ -93,7 +93,7 @@ export default async function HomePage() {
           stats={{
             totalArticles: stats.totalArticles,
             processedArticles: stats.processedArticles,
-            totalQuestions: stats.totalQuestions,
+            publishedQuestions: stats.publishedQuestions,
           }}
           categories={categories}
         />

@@ -23,7 +23,7 @@ export async function getQuizCategories() {
 }
 
 export async function getQuizStats() {
-  const [publishedQuestions, publishedArticles, totalArticles, processedArticles, totalQuestions] =
+  const [publishedQuestions, publishedArticles, totalArticles, processedArticles] =
     await Promise.all([
       db.question.count({ where: { status: "published" } }),
       db.article.count({
@@ -31,7 +31,6 @@ export async function getQuizStats() {
       }),
       db.article.count(),
       db.article.count({ where: { status: "processed" } }),
-      db.question.count(),
     ]);
 
   return {
@@ -39,7 +38,6 @@ export async function getQuizStats() {
     publishedArticles,
     totalArticles,
     processedArticles,
-    totalQuestions,
   };
 }
 

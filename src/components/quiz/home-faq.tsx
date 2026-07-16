@@ -9,7 +9,7 @@ import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
 type HomeFaqStats = {
   totalArticles: number;
   processedArticles: number;
-  totalQuestions: number;
+  publishedQuestions: number;
 };
 
 type HomeFaqProps = {
@@ -70,9 +70,9 @@ export function HomeFaq({ stats, categories }: HomeFaqProps) {
         <p>
           WS Trivia tracks {formatCount(stats.totalArticles)}{" "}
           <HelpCenterLink>Wealthsimple help center</HelpCenterLink> articles. We’ve
-          processed {formatCount(stats.processedArticles)} so far and generated{" "}
-          {formatCount(stats.totalQuestions)} trivia questions from them. Coverage will
-          grow as we process more.
+          processed {formatCount(stats.processedArticles)} so far and published{" "}
+          {formatCount(stats.publishedQuestions)} trivia questions from them. Coverage
+          will grow as we process more.
         </p>
       ),
     },
