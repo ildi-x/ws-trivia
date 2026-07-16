@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CategoryCard } from "@/components/quiz/category-card";
+import { HomeFaq } from "@/components/quiz/home-faq";
 import { categoryToSlug } from "@/components/quiz/category-utils";
 import { getQuizCategories, getQuizStats } from "@/app/(public)/actions";
 import { HELP_CENTER_HOME_URL } from "@/lib/scraper/url";
@@ -87,6 +88,15 @@ export default async function HomePage() {
             </>
           )}
         </section>
+
+        <HomeFaq
+          stats={{
+            totalArticles: stats.totalArticles,
+            processedArticles: stats.processedArticles,
+            totalQuestions: stats.totalQuestions,
+          }}
+          categories={categories}
+        />
       </main>
     </>
   );

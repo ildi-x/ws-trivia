@@ -23,14 +23,24 @@ export async function getQuizCategories() {
 }
 
 export async function getQuizStats() {
-  const [publishedQuestions, publishedArticles] = await Promise.all([
-    db.question.count({ where: { status: "published" } }),
-    db.article.count({
-      where: { facts: { some: { questions: { some: { status: "published" } } } } },
-    }),
-  ]);
+  const [publishedQuestions, publishedArticles, totalArticles, processedArticles, totalQuestions] =
+    await Promise.all([
+      db.question.count({ where: { status: "published" } }),
+      db.article.count({
+        where: { facts: { some: { questions: { some: { status: "published" } } } } },
+      }),
+      db.article.count(),
+      db.article.count({ where: { status: "processed" } }),
+      db.question.count(),
+    ]);
 
-  return { publishedQuestions, publishedArticles };
+  return {
+    publishedQuestions,
+    publishedArticles,
+    totalArticles,
+    processedArticles,
+    totalQuestions,
+  };
 }
 
 export async function getQuizQuestions(category?: string) {
